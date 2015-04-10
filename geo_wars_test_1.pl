@@ -12,7 +12,8 @@ use SDLx::Sprite;
 #Set-Up Window
 my ($width, $height) = (640, 480);
 my $app = SDLx::App->new( w => $width, h => $height, d => 32, title => 'Geometry Wars',
-						  exit_on_quit => 1);
+						  exit_on_quit => 1,
+						  dt => 0.025);
 
 #Creating a Triangle to use as player sprite. 
 my $playersize = 20;
@@ -21,6 +22,10 @@ $playersprite->surface->draw_line([$playersize/2,0], [0,$playersize], [255, 255,
 $playersprite->surface->draw_line([$playersize/2,0], [$playersize,$playersize], [255, 255,0,255]);
 $playersprite->surface->draw_line([0,$playersize], [$playersize/2,4*$playersize/5], [0, 255,0,255]);
 $playersprite->surface->draw_line([$playersize,$playersize], [$playersize/2,4*$playersize/5], [0, 255,0,255]);
+
+$playersprite->draw_xy($app, $app->w /2, $app->h /2);
+ 
+my $boundary = SDLx::Rect->new(25, 25, $app->w - 50, $app->h - 50);
 
 #SDLx::Rect->new( 10, $app->h / 2, 20, 20 )
 my $player = {
@@ -33,16 +38,13 @@ my $player = {
 # initialize positions
 reset_game();
 
-sub check_collision {
-    my ($A, $B) = @_;
-
-    return if $A->bottom < $B->top;
-    return if $A->top    > $B->bottom;
-    return if $A->right  < $B->left;
-    return if $A->left   > $B->right;
-
-    # if we got here, we have a collision!
-    return 1;
+sub check_boundary {
+	my ($A) = @_;
+	#Checking for boundary 
+	$A->{ship}->x < 14 && $A->{v_x} < 0 && ($A->{v_x} = 0);
+    $A->{ship}->y < 14 && $A->{v_y} < 0 && ($A->{v_y} = 0);
+    $A->{ship}->x > $app->w - 35 && $A->{v_x} > 0 && ($A->{v_x} = 0);
+    $A->{ship}->y > $app->h - 35 && $A->{v_y} > 0 && ($A->{v_y} = 0);
 }
 
 sub reset_game {
@@ -56,13 +58,13 @@ $app->add_event_handler(
                 $player->{v_y} = -7;
             }
             elsif ( $event->key_sym == SDLK_DOWN ) {
-                $player->{v_y} = 12;
+                $player->{v_y} = 7;
             }
             if ( $event->key_sym == SDLK_LEFT ) {
                 $player->{v_x} = -7;
             }
             elsif ( $event->key_sym == SDLK_RIGHT ) {
-                $player->{v_x} = 12;
+                $player->{v_x} = 7;
             }
             
         }
@@ -78,9 +80,6 @@ $app->add_event_handler(
             {
                 $player->{v_x} = 0;
             }
-            
-            
-            
         }
     }
 );
@@ -89,7 +88,9 @@ $app->add_event_handler(
 $app->add_move_handler( sub {
     my ( $step, $app ) = @_;
     my $ship = $player->{ship};
-
+	
+	check_boundary($player);
+    
     $ship->y( int($ship->y + ( $player->{v_y} * $step )) );
     $ship->x( int($ship->x + ( $player->{v_x} * $step )) );
     
@@ -98,9 +99,10 @@ $app->add_move_handler( sub {
 $app->add_show_handler(
     sub {
         # first, we clear the screen
-        $app->draw_rect( [ 0, 0, $app->w, $app->h ], 0x000000 );
-
-
+        $app->draw_rect( [ 0, 0, $app->w, $app->h ], 0x22114200 );
+		
+		$app->draw_rect( [ 10, 10, $app->w-20, $app->h-20 ], 0x000000 );
+		
         # then we render each ship
         #$app->draw_rect( $player->{ship}, 0xFF0000FF );
 		$playersprite->draw($app);
