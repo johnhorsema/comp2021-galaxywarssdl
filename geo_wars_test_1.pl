@@ -1,3 +1,5 @@
+#!/usr/bin/perl
+
 use strict;
 use warnings;
 use SDL;
@@ -35,6 +37,18 @@ my $player = {
     score  => 0,
 };
 
+my @colors = (
+    0xFFFFFFFF, #white
+    0xFF0000FF, #red
+    0x00FF00FF, #green
+    0x0000FFFF, #blue
+);
+
+# initialize gun properties
+my $gun_num = 0;
+my @guns;
+my $weapon_lvl = 2; # adjust this to upgrade gun
+
 # initialize positions
 reset_game();
 
@@ -66,6 +80,17 @@ $app->add_event_handler(
             elsif ( $event->key_sym == SDLK_RIGHT ) {
                 $player->{v_x} = 7;
             }
+            if ($event->key_sym == SDLK_SPACE ){
+                # gun velocity and size increases with weapon level
+                $gun_num += 1;
+                my $gun_ = {
+                    p_y => $player->{ship}->y,
+                    color => $colors[$weapon_lvl],
+                    velocity => 10 * ($weapon_lvl+1),
+                    diameter => 3 * ($weapon_lvl+1),
+                };
+                push(@guns, $gun_);
+            }
             
         }
         elsif ( $event->type == SDL_KEYUP ) {
@@ -94,6 +119,15 @@ $app->add_move_handler( sub {
     $ship->y( int($ship->y + ( $player->{v_y} * $step )) );
     $ship->x( int($ship->x + ( $player->{v_x} * $step )) );
     
+#calc_laser
+    # Calculate how gun shots move
+    my $gun;
+    my $counter = 0;
+    foreach $gun (@guns){
+        $gun->{p_y} -= $gun->{velocity} * $step;
+        if ($gun->{p_y} > $app->h - 35) {splice(@guns,$counter,1)};
+        $counter++;
+    }
 });
 
 $app->add_show_handler(
@@ -107,6 +141,11 @@ $app->add_show_handler(
         #$app->draw_rect( $player->{ship}, 0xFF0000FF );
 		$playersprite->draw($app);
       
+        # then we render the guns
+        my $gun;
+        foreach $gun (@guns){
+            $app->draw_rect( [ $player->{ship}->x+8, $gun->{p_y}, $gun->{diameter}, $gun->{diameter}*2 ], $gun->{color} );
+        }
 
         # finally, we update the screen
         $app->update;
