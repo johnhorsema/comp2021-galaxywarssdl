@@ -62,6 +62,9 @@ sub check_boundary {
 }
 
 sub reset_game {
+	$app->draw_rect( [ 0, 0, $app->w, $app->h ], 0x22114200 );
+		
+		$app->draw_rect( [ 10, 10, $app->w-20, $app->h-20 ], 0x000000 );
 }
 
 $app->add_event_handler(
@@ -85,6 +88,7 @@ $app->add_event_handler(
                 $gun_num += 1;
                 my $gun_ = {
                     p_y => $player->{ship}->y,
+                    p_x => $player->{ship}->x,
                     color => $colors[$weapon_lvl],
                     velocity => 10 * ($weapon_lvl+1),
                     diameter => 3 * ($weapon_lvl+1),
@@ -125,6 +129,7 @@ $app->add_move_handler( sub {
     my $counter = 0;
     foreach $gun (@guns){
         $gun->{p_y} -= $gun->{velocity} * $step;
+        $gun->{p_x} += $player->{v_x} * $step;
         if ($gun->{p_y} > $app->h - 35) {splice(@guns,$counter,1)};
         $counter++;
     }
@@ -144,7 +149,7 @@ $app->add_show_handler(
         # then we render the guns
         my $gun;
         foreach $gun (@guns){
-            $app->draw_rect( [ $player->{ship}->x+8, $gun->{p_y}, $gun->{diameter}, $gun->{diameter}*2 ], $gun->{color} );
+            $app->draw_rect( [ $gun->{p_x}, $gun->{p_y}, $gun->{diameter}, $gun->{diameter}*2 ], $gun->{color} );
         }
 
         # finally, we update the screen
