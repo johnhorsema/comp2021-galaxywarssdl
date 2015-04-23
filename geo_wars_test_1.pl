@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+#dependancy - imagemagick
+
 use strict;
 use warnings;
 use SDL;
@@ -26,7 +28,17 @@ $playersprite->surface->draw_line([0,$playersize], [$playersize/2,4*$playersize/
 $playersprite->surface->draw_line([$playersize,$playersize], [$playersize/2,4*$playersize/5], [0, 255,0,255]);
 
 $playersprite->draw_xy($app, $app->w /2, $app->h /2);
+#Resize mask.png to 40x40
+`convert mask.png -resize 40x40 example.png`;
+
+#Creating a list to hold all enemy object instances
+my @enemy_instances = ();
+my @enemy_sprites = ();
  
+my $enemy_1 = SDLx::Sprite->new ( width => $playersize+1, height => $playersize+1 );
+$enemy_1->load('example.png');
+$enemy_sprites[0] = $enemy_1;
+
 my $boundary = SDLx::Rect->new(25, 25, $app->w - 50, $app->h - 50);
 
 #SDLx::Rect->new( 10, $app->h / 2, 20, 20 )
@@ -51,7 +63,7 @@ my $weapon_lvl = 2; # adjust this to upgrade gun
 
 # initialize positions
 reset_game();
-
+create_enemy();
 sub check_boundary {
 	my ($A) = @_;
 	#Checking for boundary 
@@ -129,11 +141,40 @@ $app->add_move_handler( sub {
     my $counter = 0;
     foreach $gun (@guns){
         $gun->{p_y} -= $gun->{velocity} * $step;
-        $gun->{p_x} += $player->{v_x} * $step;
+        $gun->{p_x} += 1.3 * $player->{v_x} * $step;
         if ($gun->{p_y} > $app->h - 35) {splice(@guns,$counter,1)};
         $counter++;
     }
 });
+
+#Create Enemy
+sub create_enemy 
+{
+	my $enem = {
+    sprite => $enemy_sprites[int(rand(scalar(@enemy_sprites))) ],
+    v_y    => rand(2)-1, #Change to something more appropriate
+    v_x	   => rand(2)-1,
+	};
+	$enem->{sprite}->draw_xy($app, $app->w /2, $app->h /2);
+	push @enemy_instances, $enem; 
+}
+
+#Load all enemies
+sub load_enemies
+{
+	#First update positions of enemies
+	#Then Draw on canvas
+	
+	foreach my $inst (@enemy_instances) {
+		$app->add_move_handler( sub {
+			my ( $step, $app ) = @_;
+			$inst->{sprite}->y( int($inst->{sprite}->y + ( $inst->{v_y} * $step )) );
+			$inst->{sprite}->x( int($inst->{sprite}->x + ( $inst->{v_x} * $step )) );
+		});
+		$inst->{sprite}->draw($app);
+	}
+	
+}
 
 $app->add_show_handler(
     sub {
@@ -145,7 +186,7 @@ $app->add_show_handler(
         # then we render each ship
         #$app->draw_rect( $player->{ship}, 0xFF0000FF );
 		$playersprite->draw($app);
-      
+		load_enemies();
         # then we render the guns
         my $gun;
         foreach $gun (@guns){
