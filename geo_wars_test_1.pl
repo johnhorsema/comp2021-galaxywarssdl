@@ -19,6 +19,17 @@ my $app = SDLx::App->new( w => $width, h => $height, d => 32, title => 'Geometry
 						  exit_on_quit => 1,
 						  dt => 0.025);
 
+#Create cover
+my $cover = SDLx::Surface->load('cover.png');
+#Cover text
+my $covertxt = SDLx::Text->new(x => $width/4, y => $height/2, font => 'font.ttf');
+
+#Create background
+my $bg = SDLx::Sprite->new(width => $width-20, height => $height-20);
+$bg->load('bg.png');
+
+my $start_game = 0;
+
 #Creating a Triangle to use as player sprite. 
 my $playersize = 20;
 my $playersprite = SDLx::Sprite->new ( width => $playersize+1, height => $playersize+1 );
@@ -59,11 +70,17 @@ my @colors = (
 # initialize gun properties
 my $gun_num = 0;
 my @guns;
-my $weapon_lvl = 2; # adjust this to upgrade gun
+my $weapon_lvl = 0; # adjust this to upgrade gun
 
 # initialize positions
 reset_game();
 create_enemy();
+
+sub start_screen {
+    $cover->blit( $app );
+    $covertxt->write_to( $app, '- Press any key to start -' );
+}
+
 sub check_boundary {
 	my ($A) = @_;
 	#Checking for boundary 
@@ -74,15 +91,19 @@ sub check_boundary {
 }
 
 sub reset_game {
-	$app->draw_rect( [ 0, 0, $app->w, $app->h ], 0x22114200 );
-		
-		$app->draw_rect( [ 10, 10, $app->w-20, $app->h-20 ], 0x000000 );
+    $app->draw_rect( [ 0, 0, $app->w, $app->h ], 0x22114200 );
+    $app->draw_rect( [ 10, 10, $app->w-20, $app->h-20 ], 0x000000 );
+    #Render bg img
+    $bg->draw_xy( $app, 10, 10 );
 }
 
 $app->add_event_handler(
 	sub {
 		my ( $event, $app ) = @_;
         if ( $event->type == SDL_KEYDOWN ) {
+            if(!$start_game){
+                $start_game = 1;
+            }
             if ( $event->key_sym == SDLK_UP ) {
                 $player->{v_y} = -7;
             }
@@ -98,6 +119,7 @@ $app->add_event_handler(
             if ($event->key_sym == SDLK_SPACE ){
                 # gun velocity and size increases with weapon level
                 $gun_num += 1;
+                # create gun instance and push
                 my $gun_ = {
                     p_y => $player->{ship}->y,
                     p_x => $player->{ship}->x,
@@ -141,7 +163,8 @@ $app->add_move_handler( sub {
     my $counter = 0;
     foreach $gun (@guns){
         $gun->{p_y} -= $gun->{velocity} * $step;
-        $gun->{p_x} += 1.3 * $player->{v_x} * $step;
+        # Swerve the shot horizontally
+        $gun->{p_x} += 1.1 * $player->{v_x} * $step;
         if ($gun->{p_y} > $app->h - 35) {splice(@guns,$counter,1)};
         $counter++;
     }
@@ -178,19 +201,23 @@ sub load_enemies
 
 $app->add_show_handler(
     sub {
-        # first, we clear the screen
-        $app->draw_rect( [ 0, 0, $app->w, $app->h ], 0x22114200 );
-		
-		$app->draw_rect( [ 10, 10, $app->w-20, $app->h-20 ], 0x000000 );
-		
-        # then we render each ship
-        #$app->draw_rect( $player->{ship}, 0xFF0000FF );
-		$playersprite->draw($app);
-		load_enemies();
-        # then we render the guns
-        my $gun;
-        foreach $gun (@guns){
-            $app->draw_rect( [ $gun->{p_x}, $gun->{p_y}, $gun->{diameter}, $gun->{diameter}*2 ], $gun->{color} );
+        # show start screen
+        if(!$start_game){
+            start_screen();
+        }
+        else{
+            # first, we clear the screen
+            reset_game();
+            # then we render each ship
+            #$app->draw_rect( $player->{ship}, 0xFF0000FF );
+            $playersprite->draw($app);
+            # then we render enemies
+            load_enemies();
+            # then we render the guns
+            my $gun;
+            foreach $gun (@guns){
+                $app->draw_rect( [ $gun->{p_x}, $gun->{p_y}, $gun->{diameter}, $gun->{diameter}*2 ], $gun->{color} );
+            }
         }
 
         # finally, we update the screen
