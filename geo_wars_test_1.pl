@@ -118,15 +118,13 @@ sub check_enemy_shot {
 }
 
 sub delete_gun {
-	my @temp_guns = ();
 	foreach my $i (0..(-1 + scalar @guns))
 	{
-		if ($guns[$i]->{p_y} > 20)
+		if ($guns[$i]->{p_y} > 0)
 		{
-			push @temp_guns, $guns[$i];
+			delete $guns[$i];
 		}
 	}
-	@guns = @temp_guns;
 }
 
 
