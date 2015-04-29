@@ -98,6 +98,19 @@ sub check_boundary {
     $A->{ship}->x > $app->w - 40 && $A->{v_x} > 0 && ($A->{v_x} = 0);
     $A->{ship}->y > $app->h - 60 && $A->{v_y} > 0 && ($A->{v_y} = 0);
 }
+sub check_death {
+	#If enemy ship crashes into player ship
+	my @temp_enems = ();
+	foreach my $i (0..(-1 + scalar @enemy_instances))
+	{
+		if((@enemy_instances[$i]->{sprite}->x - $player->{ship}->x)**2 + (@enemy_instances[$i]->{sprite}->y - $player->{ship}->y)**2 > 500)
+		{
+			push @temp_enems, $enemy_instances[$i];
+		}  
+	} 
+	@enemy_instances = @temp_enems;
+
+}
 
 sub check_enemy_shot {
 	foreach my $inst (@enemy_instances) {
@@ -303,6 +316,7 @@ $app->add_show_handler(
                 $app->draw_rect( [ $gun->{p_x}, $gun->{p_y}, $gun->{diameter}, $gun->{diameter}*2 ], $gun->{color} );
             }
             check_enemy_shot();
+            check_death();
             delete_gun();
         }
 
