@@ -103,11 +103,12 @@ sub check_enemy_shot {
 				
 			print "\n",(($shot->{p_x}-$inst->{sprite}->x)**2 + ($shot->{p_y}-$inst->{sprite}->y)**2);
 				$inst->{sprite}->alpha(0);
+				my @temp_enems = ();
 				foreach my $i (0..(-1 + scalar @enemy_instances))
 				{
-					if( \$inst == \$enemy_instances[$i])
+					if( \$inst != \$enemy_instances[$i])
 					{
-						delete $enemy_instances[$i];
+						push @temp_enems, $enemy_instances[$i];
 					}
 				}
 			} 
@@ -217,7 +218,7 @@ sub create_enemy
 	};
 	$enem->{sprite}->draw_xy($app, rand($app->w), 10 + rand($app->h/2) );
 	push @enemy_instances, $enem; 
-	print scalar @enemy_instances;
+	print scalar @enemy_instances,"\n";
 }
 
 #Load all enemies
@@ -227,12 +228,15 @@ sub load_enemies
 	#Then Draw on canvas
 	
 	foreach my $inst (@enemy_instances) {
+		
+		$inst->{sprite}->draw($app);
+		
 		$app->add_move_handler( sub {
 			my ( $step, $app ) = @_;
 			$inst->{sprite}->y( int($inst->{sprite}->y + ( $inst->{v_y} * $step )) );
 			$inst->{sprite}->x( int($inst->{sprite}->x + ( $inst->{v_x} * $step )) );
 		});
-		$inst->{sprite}->draw($app);
+		
 	}
 	
 }
