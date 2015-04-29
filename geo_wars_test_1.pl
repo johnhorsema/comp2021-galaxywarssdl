@@ -22,11 +22,15 @@ my $app = SDLx::App->new( w => $width, h => $height, d => 32, title => 'Galaxy W
 #Create cover
 my $cover = SDLx::Surface->load('cover.png');
 #Cover text
-my $covertxt = SDLx::Text->new(x => ($width-340)/2, y => $height/2, font => 'font.ttf', h_align => 'right', text => '- Press any key to start -' );
+my $covertxt = SDLx::Text->new(x => ($width-340)/2, y => $height/2, font => 'font.ttf', text => '- Press any key to start -' );
 
 #Create background
 my $bg = SDLx::Sprite->new(width => $width-20, height => $height-20);
 $bg->load('bg.png');
+
+#Scoring
+my $scoretxt = SDLx::Text->new(x => $app->w-120, y => 10, font => 'font.ttf', text => 'Score:' );
+my $scorevaluetxt = SDLx::Text->new(x => $app->w-20, y => 10, font => 'font.ttf');
 
 my $start_game = 0;
 
@@ -105,6 +109,7 @@ sub check_enemy_shot {
 				{
 					if( \$inst != \$enemy_instances[$i])
 					{
+                        $player->{score}+=10;
 						push @temp_enems, $enemy_instances[$i];
 					}
 				}
@@ -124,9 +129,7 @@ sub delete_gun {
 			push @temp_guns, $guns[$i];
 		}
 	}
-    warn "gunnumb4:",scalar @guns,"\n";
 	@guns = @temp_guns;
-    warn "gunnumaftr:",scalar @guns,"\n";
 }
 
 
@@ -134,6 +137,9 @@ sub reset_game {
     $app->draw_rect( [ 0, 0, $app->w-20, $app->h-20 ], 0x000000 );
     #Render bg img
     $bg->draw_xy( $app, 0, 0 );
+    $scoretxt->write_to( $app );
+    $scorevaluetxt->text($player->{score});
+    $scorevaluetxt->write_to( $app );
 }
 
 $app->add_event_handler(
@@ -244,9 +250,6 @@ sub load_enemies
 		});
 		
 		$inst->{sprite}->draw($app);
-		
-		
-		
 	}
 	
 }
