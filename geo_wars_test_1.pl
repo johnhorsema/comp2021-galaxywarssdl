@@ -143,6 +143,11 @@ $app->add_event_handler(
             if(!$start_game){
                 $start_game = 1;
             }
+            if($event->key_sym == SDLK_p)
+            {
+				create_enemy();
+				load_enemies();
+			}
             if ( $event->key_sym == SDLK_UP ) {
                 $player->{v_y} = -7;
             }
@@ -183,6 +188,7 @@ $app->add_event_handler(
                 $player->{v_x} = 0;
             }
         }
+       
     }
 );
 
