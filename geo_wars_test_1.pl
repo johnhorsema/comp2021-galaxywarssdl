@@ -11,7 +11,10 @@ use SDLx::App;
 use SDLx::Text;
 use SDLx::Rect;
 use SDLx::Sprite;
-
+use SDLx::Sound;
+use SDL::Mixer;
+use SDL::Mixer::Channels;
+use SDL::Mixer::Samples;
 
 #Set-Up Window
 my ($width, $height) = (800, 600);
@@ -28,6 +31,13 @@ my $covertxt = SDLx::Text->new(x => ($width-340)/2, y => $height/2, font => 'fon
 my $bg = SDLx::Sprite->new(width => $width-20, height => $height-20);
 $bg->load('bg.png');
 
+#Create sound object
+ SDL::init(SDL_INIT_AUDIO);
+ SDL::Mixer::open_audio( 44100, SDL::Constants::AUDIO_S16, 2, 4096);
+ SDL::Mixer::Channels::allocate_channels(4);
+ my $laser = SDL::Mixer::Samples::load_WAV('laser.wav');
+ 
+
 #Scoring
 my $scoretxt = SDLx::Text->new(x => $app->w-200, y => 10, font => 'font.ttf', text => 'Score:' );
 my $scorevaluetxt = SDLx::Text->new(x => $app->w-80, y => 10, font => 'font.ttf');
@@ -37,17 +47,13 @@ my $start_game = 0;
 #Creating a Triangle to use as player sprite. 
 my $playersize = 35;
 my $playersprite = SDLx::Sprite->new ( width => $playersize, height => $playersize*1.6 );
-#Resise ship to 40x40
+#Resize ship 
 `convert ship.png -resize 35x56 ship_01.png`;
 $playersprite->load('ship_01.png');
 
-#$playersprite->surface->draw_line([$playersize/2,0], [0,$playersize], [255, 255,0,255]);
-#$playersprite->surface->draw_line([$playersize/2,0], [$playersize,$playersize], [255, 255,0,255]);
-#$playersprite->surface->draw_line([0,$playersize], [$playersize/2,4*$playersize/5], [0, 255,0,255]);
-#$playersprite->surface->draw_line([$playersize,$playersize], [$playersize/2,4*$playersize/5], [0, 255,0,255]);
 
 #Player spawn at center
-$playersprite->draw_xy($app, $app->w /2, $app->h /2);
+$playersprite->draw_xy($app, $app->w /2, $app->h - 60);
 
 #Resize alien.png to 40x60
 `convert alien.png -resize 40x60 alien_01.png`;
@@ -110,6 +116,10 @@ sub check_death {
 		{
 			push @temp_enems, $enemy_instances[$i];
 		}  
+		else
+		{
+			delete  $enemy_instances[$i];
+		}
 	} 
 	@enemy_instances = @temp_enems;
 
@@ -132,20 +142,28 @@ sub check_enemy_shot {
                             $player->{score}+=10;
                             push @temp_enems, $enemy_instances[$i];
                         }
+                        else
+                        {
+                            delete $enemy_instances[$i];
+                        }
                     }
                     @enemy_instances = @temp_enems;
                 }
 
-                #Delete the bullet that hit the ship
-                my @temp_guns = ();
-                foreach my $i (0..(-1 + scalar @guns))
-                {
-                    if( \$shot != \$guns[$i])
-                    {
-                        push @temp_guns, $guns[$i];
-                    }
-                }
-                @guns = @temp_guns;
+				#Delete the bullet that hit the ship
+				my @temp_guns = ();
+				foreach my $i (0..(-1 + scalar @guns))
+				{
+					if( \$shot != \$guns[$i])
+					{
+						push @temp_guns, $guns[$i];
+					}
+					else
+					{
+						delete $guns[$i];
+					}
+				}
+				@guns = @temp_guns;
 			}
 				
 		}
@@ -159,6 +177,10 @@ sub delete_gun {
 		if ($guns[$i]->{p_y} > 20)
 		{
 			push @temp_guns, $guns[$i];
+		}
+		else
+		{
+			delete $guns[$i];
 		}
 	}
 	@guns = @temp_guns;
@@ -200,6 +222,9 @@ $app->add_event_handler(
                 $player->{v_x} = 7;
             }
             if ($event->key_sym == SDLK_SPACE ){
+				#Play laser
+				SDL::Mixer::Channels::play_channel( 0, $laser , 0 );
+                
                 # gun velocity and size increases with weapon level
                 $gun_num += 1;
                 # create gun instance and push
@@ -211,6 +236,7 @@ $app->add_event_handler(
                     diameter => 3 * ($weapon_lvl+1),
                 };
                 push(@guns, $gun_);
+                
             }
             
         }
@@ -298,6 +324,10 @@ sub load_enemies
 				if( \$inst != \$enemy_instances[$i])
 				{
 					push @temp_enems, $enemy_instances[$i];
+				}
+				else
+				{
+					delete $guns[$i];
 				}
 			}
 			@enemy_instances = @temp_enems;
