@@ -29,8 +29,8 @@ my $bg = SDLx::Sprite->new(width => $width-20, height => $height-20);
 $bg->load('bg.png');
 
 #Scoring
-my $scoretxt = SDLx::Text->new(x => $app->w-120, y => 10, font => 'font.ttf', text => 'Score:' );
-my $scorevaluetxt = SDLx::Text->new(x => $app->w-20, y => 10, font => 'font.ttf');
+my $scoretxt = SDLx::Text->new(x => $app->w-200, y => 10, font => 'font.ttf', text => 'Score:' );
+my $scorevaluetxt = SDLx::Text->new(x => $app->w-80, y => 10, font => 'font.ttf');
 
 my $start_game = 0;
 
@@ -114,6 +114,17 @@ sub check_enemy_shot {
 					}
 				}
 				@enemy_instances = @temp_enems;
+				
+				#Delete the bullet that hit the ship
+				my @temp_guns = ();
+				foreach my $i (0..(-1 + scalar @guns))
+				{
+					if( \$shot != \$guns[$i])
+					{
+						push @temp_guns, $guns[$i];
+					}
+				}
+				@guns = @temp_guns;
 			} 
 				
 		}
@@ -216,7 +227,7 @@ $app->add_move_handler( sub {
     foreach $gun (@guns){
         $gun->{p_y} -= $gun->{velocity} * $step;
         # Swerve the shot horizontally
-        $gun->{p_x} += 0.4 * $player->{v_x} * $step;
+        $gun->{p_x} += 0.1 * $player->{v_x} * $step;
         if ($gun->{p_y} > $app->h - 35) {splice(@guns,$counter,1)};
         $counter++;
     }
@@ -230,7 +241,7 @@ sub create_enemy
     v_y    => 1, #Change to something more appropriate
     v_x	   => 0,
 	};
-	$enem->{sprite}->draw_xy($app, rand($app->w), 10 + rand($app->h/2) );
+	$enem->{sprite}->draw_xy($app, 50 + rand(-100 +$app->w),  rand( $app->h/2) );
 	push @enemy_instances, $enem; 
 	warn "num of enemies:",scalar @enemy_instances;
 }
@@ -249,7 +260,21 @@ sub load_enemies
 			{$inst->{sprite}->y( int($inst->{sprite}->y + ( $inst->{v_y} )) );}
 			$inst->{sprite}->x( int($inst->{sprite}->x + ( $inst->{v_x} * $step )) );
 		});
-		
+		if($inst->{sprite}->y >= $app->h)
+		{
+			#Lose points for allowing enemy to pass
+			$player->{score}-=20;
+			
+			my @temp_enems = ();
+			foreach my $i (0..(-1 + scalar @enemy_instances))
+			{
+				if( \$inst != \$enemy_instances[$i])
+				{
+					push @temp_enems, $enemy_instances[$i];
+				}
+			}
+			@enemy_instances = @temp_enems;
+		}
 		$inst->{sprite}->draw($app);
 	}
 	
