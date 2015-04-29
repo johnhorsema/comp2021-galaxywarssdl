@@ -130,8 +130,8 @@ sub check_enemy_shot {
 		foreach my $shot (@guns) {
 			if (((-20 + $shot->{p_x}-$inst->{sprite}->x)**2 + ($shot->{p_y}-$inst->{sprite}->y)**2) < 350)
 			{
-                if($inst->{shield}){
-                    $inst->{shield}=0;
+                if($inst->{shieldOn}){
+                    $inst->{shieldOn}=0;
                 }
                 else{
                     my @temp_enems = ();
