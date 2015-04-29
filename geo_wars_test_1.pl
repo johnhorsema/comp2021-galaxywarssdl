@@ -61,6 +61,10 @@ $playersprite->draw_xy($app, $app->w /2, $app->h - 60);
 #Resize alien.png to 40x60
 `convert alien_shield.png -resize 40x60 alien_shield_01.png`;
 
+#Resize explode to 40x60
+`convert alien_explode.png -resize 40x60 alien_explode_01.png`;
+
+
 #Creating a list to hold all enemy object instances
 my @enemy_instances = ();
 my @enemy_sprites = ();
@@ -76,6 +80,7 @@ my $player = {
     v_y    => 0,
     v_x	   => 0,
     score  => 0,
+    lives  => 3
 };
 
 my @colors = (
@@ -118,6 +123,13 @@ sub check_death {
 		}  
 		else
 		{
+			SDLx::Sprite->new ( width => $playersize+1, height => $playersize+1, image=>'alien_explode_01.png')->draw_xy($app, $enemy_instances[$i]->{sprite}->x, $enemy_instances[$i]->{sprite}->y);
+			$app->update;
+			$player->{lives}-=1;
+			if($player->{lives} > 0)
+				{$app->delay(1000);}
+			else
+				{SDL::quit;}
 			delete  $enemy_instances[$i];
 		}
 	} 
@@ -132,6 +144,7 @@ sub check_enemy_shot {
 			{
                 if($inst->{shieldOn}){
                     $inst->{shieldOn}=0;
+                    $player->{score}+=10;
                 }
                 else{
                     my @temp_enems = ();
