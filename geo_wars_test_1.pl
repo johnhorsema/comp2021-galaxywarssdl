@@ -52,6 +52,9 @@ $playersprite->draw_xy($app, $app->w /2, $app->h /2);
 #Resize alien.png to 40x60
 `convert alien.png -resize 40x60 alien_01.png`;
 
+#Resize alien.png to 40x60
+`convert alien_shield.png -resize 40x60 alien_shield_01.png`;
+
 #Creating a list to hold all enemy object instances
 my @enemy_instances = ();
 my @enemy_sprites = ();
@@ -103,7 +106,7 @@ sub check_death {
 	my @temp_enems = ();
 	foreach my $i (0..(-1 + scalar @enemy_instances))
 	{
-		if((@enemy_instances[$i]->{sprite}->x - $player->{ship}->x)**2 + (@enemy_instances[$i]->{sprite}->y - $player->{ship}->y)**2 > 500)
+		if(($enemy_instances[$i]->{sprite}->x - $player->{ship}->x)**2 + ($enemy_instances[$i]->{sprite}->y - $player->{ship}->y)**2 > 500)
 		{
 			push @temp_enems, $enemy_instances[$i];
 		}  
@@ -115,30 +118,35 @@ sub check_death {
 sub check_enemy_shot {
 	foreach my $inst (@enemy_instances) {
 		foreach my $shot (@guns) {
-			if (((-20 + $shot->{p_x}-$inst->{sprite}->x)**2 + ($shot->{p_y}-$inst->{sprite}->y)**2) < 350  )
+			if (((-20 + $shot->{p_x}-$inst->{sprite}->x)**2 + ($shot->{p_y}-$inst->{sprite}->y)**2) < 350)
 			{
-				my @temp_enems = ();
-				foreach my $i (0..(-1 + scalar @enemy_instances))
-				{
-					if( \$inst != \$enemy_instances[$i])
-					{
-                        $player->{score}+=10;
-						push @temp_enems, $enemy_instances[$i];
-					}
-				}
-				@enemy_instances = @temp_enems;
-				
-				#Delete the bullet that hit the ship
-				my @temp_guns = ();
-				foreach my $i (0..(-1 + scalar @guns))
-				{
-					if( \$shot != \$guns[$i])
-					{
-						push @temp_guns, $guns[$i];
-					}
-				}
-				@guns = @temp_guns;
-			} 
+                if($inst->{shield}){
+                    $inst->{shield}=0;
+                }
+                else{
+                    my @temp_enems = ();
+                    foreach my $i (0..(-1 + scalar @enemy_instances))
+                    {
+                        if( \$inst != \$enemy_instances[$i])
+                        {
+                            $player->{score}+=10;
+                            push @temp_enems, $enemy_instances[$i];
+                        }
+                    }
+                    @enemy_instances = @temp_enems;
+                }
+
+                #Delete the bullet that hit the ship
+                my @temp_guns = ();
+                foreach my $i (0..(-1 + scalar @guns))
+                {
+                    if( \$shot != \$guns[$i])
+                    {
+                        push @temp_guns, $guns[$i];
+                    }
+                }
+                @guns = @temp_guns;
+			}
 				
 		}
 	}
@@ -250,11 +258,17 @@ $app->add_move_handler( sub {
 sub create_enemy 
 {
 	my $enem = {
-    sprite => SDLx::Sprite->new ( width => $playersize+1, height => $playersize+1, image=>'alien_01.png'),
+    sprite => SDLx::Sprite->new ( width => $playersize+1, height => $playersize+1, image=>'alien_01.png' ),
     v_y    => 1, #Change to something more appropriate
     v_x	   => 0,
+    shieldOn => 0,
+    shield => SDLx::Sprite->new ( width => $playersize+1, height => $playersize+1, image=>'alien_shield_01.png' ),
 	};
 	$enem->{sprite}->draw_xy($app, 50 + rand(-100 +$app->w),  rand( $app->h/2) );
+    if(int rand 5 == 1){
+        $enem->{shieldOn} = 1;
+        $enem->{shield}->draw_xy($app, $enem->{v_x}, $enem->{v_y} );
+    }
 	push @enemy_instances, $enem; 
 	warn "num of enemies:",scalar @enemy_instances;
 }
@@ -266,12 +280,12 @@ sub load_enemies
 	#Then Draw on canvas
 	
 	foreach my $inst (@enemy_instances) {
-		
 		$app->add_move_handler( sub {
 			my ( $step, $app ) = @_;
 			if(int rand 300 == 1)
-			{$inst->{sprite}->y( int($inst->{sprite}->y + ( $inst->{v_y} )) );}
+			{$inst->{sprite}->y( int($inst->{sprite}->y + ( $inst->{v_y} )) );$inst->{shield}->y($inst->{speite}->y);}
 			$inst->{sprite}->x( int($inst->{sprite}->x + ( $inst->{v_x} * $step )) );
+            $inst->{shield}->x( int($inst->{sprite}->x) );
 		});
 		if($inst->{sprite}->y >= $app->h)
 		{
@@ -289,6 +303,9 @@ sub load_enemies
 			@enemy_instances = @temp_enems;
 		}
 		$inst->{sprite}->draw($app);
+        if($inst->{shieldOn}){
+            $inst->{shield}->draw($app);
+        }
 	}
 	
 }
