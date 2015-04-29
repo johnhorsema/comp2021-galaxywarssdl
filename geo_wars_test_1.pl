@@ -111,6 +111,7 @@ sub check_enemy_shot {
 						push @temp_enems, $enemy_instances[$i];
 					}
 				}
+				@enemy_instances = @temp_enems;
 			} 
 				
 		}
@@ -118,13 +119,15 @@ sub check_enemy_shot {
 }
 
 sub delete_gun {
+	my @temp_guns = ();
 	foreach my $i (0..(-1 + scalar @guns))
 	{
-		if ($guns[$i]->{p_y} < 10)
+		if ($guns[$i]->{p_y} > 20)
 		{
-			delete $guns[$i];
+			push @temp_guns, $guns[$i];
 		}
 	}
+	@guns = @temp_guns;
 }
 
 
@@ -265,6 +268,7 @@ $app->add_show_handler(
                 $app->draw_rect( [ $gun->{p_x}, $gun->{p_y}, $gun->{diameter}, $gun->{diameter}*2 ], $gun->{color} );
             }
             check_enemy_shot();
+            delete_gun();
         }
 
         # finally, we update the screen
