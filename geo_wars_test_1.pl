@@ -293,7 +293,7 @@ sub create_enemy
 	$enem->{sprite}->draw_xy($app, 50 + rand(-100 +$app->w),  rand( $app->h/2) );
     if(int rand 5 == 1){
         $enem->{shieldOn} = 1;
-        $enem->{shield}->draw_xy($app, $enem->{v_x}, $enem->{v_y} );
+        $enem->{shield}->draw_xy($app, $enem->{sprite}->x, $enem->{sprite}->y );
     }
 	push @enemy_instances, $enem; 
 	warn "num of enemies:",scalar @enemy_instances;
@@ -309,9 +309,10 @@ sub load_enemies
 		$app->add_move_handler( sub {
 			my ( $step, $app ) = @_;
 			if(int rand 300 == 1)
-			{$inst->{sprite}->y( int($inst->{sprite}->y + ( $inst->{v_y} )) );$inst->{shield}->y($inst->{speite}->y);}
+			{
+				$inst->{sprite}->y( int($inst->{sprite}->y + ( $inst->{v_y} )) );
+			}
 			$inst->{sprite}->x( int($inst->{sprite}->x + ( $inst->{v_x} * $step )) );
-            $inst->{shield}->x( int($inst->{sprite}->x) );
 		});
 		if($inst->{sprite}->y >= $app->h)
 		{
@@ -334,7 +335,7 @@ sub load_enemies
 		}
 		$inst->{sprite}->draw($app);
         if($inst->{shieldOn}){
-            $inst->{shield}->draw($app);
+            $inst->{shield}->draw_xy($app, $inst->{sprite}->x, $inst->{sprite}->y);
         }
 	}
 	
