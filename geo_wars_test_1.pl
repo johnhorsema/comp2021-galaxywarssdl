@@ -43,6 +43,10 @@ $bg->load('bg.png');
 my $scoretxt = SDLx::Text->new(x => $app->w-200, y => 10, font => 'font.ttf', text => 'Score:' );
 my $scorevaluetxt = SDLx::Text->new(x => $app->w-80, y => 10, font => 'font.ttf');
 
+#Beam
+my $beam = SDLx::Sprite->new(width => 90, height => $app->h);
+$beam->load('beam.png');
+
 my $start_game = 0;
 
 #Creating a Triangle to use as player sprite. 
@@ -225,6 +229,10 @@ $app->add_event_handler(
 				load_enemies();
 				#$app->update;
 			}
+            if($event->key_sym == SDLK_b)
+            {
+                $player->{beamOn} = 1;
+			}
             if ( $event->key_sym == SDLK_UP ) {
                 $player->{v_y} = -7;
             }
@@ -303,6 +311,7 @@ sub create_enemy
     sprite => SDLx::Sprite->new ( width => $playersize+1, height => $playersize+1, image=>'alien_01.png' ),
     v_y    => 1, #Change to something more appropriate
     v_x	   => 0,
+    beamOn => 0,
     shieldOn => 0,
     shield => SDLx::Sprite->new ( width => $playersize+1, height => $playersize+1, image=>'alien_shield_01.png' ),
 	};
@@ -368,6 +377,10 @@ $app->add_show_handler(
             reset_game();
             # then we render player ship
             $playersprite->draw($app);
+            # beam on!
+            if($player->{beamOn}){
+                $beam->draw_xy($app, $player->{ship}->x-28, $player->{ship}->y-600);
+            }
             
             if(int rand 500 == 1 || scalar @enemy_instances == 1)
             {create_enemy();}
