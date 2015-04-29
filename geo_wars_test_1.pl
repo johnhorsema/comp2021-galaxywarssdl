@@ -98,7 +98,7 @@ sub check_boundary {
 sub check_enemy_shot {
 	foreach my $inst (@enemy_instances) {
 		foreach my $shot (@guns) {
-			if ((($shot->{p_x}-$inst->{sprite}->x)**2 + ($shot->{p_y}-$inst->{sprite}->y)**2) < 50  )
+			if (((-20 + $shot->{p_x}-$inst->{sprite}->x)**2 + ($shot->{p_y}-$inst->{sprite}->y)**2) < 250  )
 			{
 				
 			print "\n",(($shot->{p_x}-$inst->{sprite}->x)**2 + ($shot->{p_y}-$inst->{sprite}->y)**2);
@@ -254,8 +254,8 @@ $app->add_show_handler(
             #$app->draw_rect( $player->{ship}, 0xFF0000FF );
             $playersprite->draw($app);
             
-            if(int rand 100 == 1)
-            {create_enemy();}
+            #if(int rand 100 == 1)
+            #{create_enemy();}
             # then we render enemies
             load_enemies();
             
