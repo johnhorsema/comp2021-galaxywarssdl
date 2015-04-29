@@ -221,7 +221,7 @@ sub create_enemy
 {
 	my $enem = {
     sprite => SDLx::Sprite->new ( width => $playersize+1, height => $playersize+1, image=>'alien_01.png'),
-    v_y    => 0, #Change to something more appropriate
+    v_y    => 1, #Change to something more appropriate
     v_x	   => 0,
 	};
 	$enem->{sprite}->draw_xy($app, rand($app->w), 10 + rand($app->h/2) );
@@ -239,7 +239,8 @@ sub load_enemies
 		
 		$app->add_move_handler( sub {
 			my ( $step, $app ) = @_;
-			$inst->{sprite}->y( int($inst->{sprite}->y + ( $inst->{v_y} * $step )) );
+			if(int rand 300 == 1)
+			{$inst->{sprite}->y( int($inst->{sprite}->y + ( $inst->{v_y} )) );}
 			$inst->{sprite}->x( int($inst->{sprite}->x + ( $inst->{v_x} * $step )) );
 		});
 		
@@ -263,7 +264,7 @@ $app->add_show_handler(
             # then we render player ship
             $playersprite->draw($app);
             
-            if(int rand 500 == 1 || scalar @enemy_instances == 0)
+            if(int rand 500 == 1 || scalar @enemy_instances == 1)
             {create_enemy();}
             # then we render enemies
             load_enemies();
