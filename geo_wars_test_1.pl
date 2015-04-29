@@ -36,6 +36,7 @@ $bg->load('bg.png');
  SDL::Mixer::open_audio( 44100, SDL::Constants::AUDIO_S16, 2, 4096);
  SDL::Mixer::Channels::allocate_channels(4);
  my $laser = SDL::Mixer::Samples::load_WAV('laser.wav');
+ my $explode = SDL::Mixer::Samples::load_WAV('explosion.wav');
  
 
 #Scoring
@@ -124,12 +125,14 @@ sub check_death {
 		else
 		{
 			SDLx::Sprite->new ( width => $playersize+1, height => $playersize+1, image=>'alien_explode_01.png')->draw_xy($app, $enemy_instances[$i]->{sprite}->x, $enemy_instances[$i]->{sprite}->y);
+			SDL::Mixer::Channels::play_channel(-1, $explode , 0 );
 			$app->update;
 			$player->{lives}-=1;
 			if($player->{lives} > 0)
-				{$app->delay(1000);}
+				{$app->delay(200);}
 			else
-				{SDL::quit;}
+				{$app->delay(1000);
+					SDL::quit;}
 			delete  $enemy_instances[$i];
 		}
 	} 
