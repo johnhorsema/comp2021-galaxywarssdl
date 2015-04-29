@@ -99,15 +99,15 @@ sub check_boundary {
 sub check_enemy_shot {
 	foreach my $inst (@enemy_instances) {
 		foreach my $shot (@guns) {
-        			warn "\n shot?",(($shot->{p_x}-$inst->{sprite}->x)**2 + ($shot->{p_y}-$inst->{sprite}->y)**2);
-			if ((($shot->{p_x}-$inst->{sprite}->x)**2 + ($shot->{p_y}-$inst->{sprite}->y)**2) < 50  )
+			if (((-20 + $shot->{p_x}-$inst->{sprite}->x)**2 + ($shot->{p_y}-$inst->{sprite}->y)**2) < 250  )
 			{
 				$inst->{sprite}->alpha(0);
+				my @temp_enems = ();
 				foreach my $i (0..(-1 + scalar @enemy_instances))
 				{
-					if( \$inst == \$enemy_instances[$i])
+					if( \$inst != \$enemy_instances[$i])
 					{
-						delete $enemy_instances[$i];
+						push @temp_enems, $enemy_instances[$i];
 					}
 				}
 			} 
@@ -227,12 +227,15 @@ sub load_enemies
 	#Then Draw on canvas
 	
 	foreach my $inst (@enemy_instances) {
+		
+		$inst->{sprite}->draw($app);
+		
 		$app->add_move_handler( sub {
 			my ( $step, $app ) = @_;
 			$inst->{sprite}->y( int($inst->{sprite}->y + ( $inst->{v_y} * $step )) );
 			$inst->{sprite}->x( int($inst->{sprite}->x + ( $inst->{v_x} * $step )) );
 		});
-		$inst->{sprite}->draw($app);
+		
 	}
 	
 }
@@ -249,8 +252,8 @@ $app->add_show_handler(
             # then we render player ship
             $playersprite->draw($app);
             
-            if(int rand 100 == 1)
-            {create_enemy();}
+            #if(int rand 100 == 1)
+            #{create_enemy();}
             # then we render enemies
             load_enemies();
             
