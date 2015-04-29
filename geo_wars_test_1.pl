@@ -126,7 +126,9 @@ sub delete_gun {
 			push @temp_guns, $guns[$i];
 		}
 	}
+    warn "gunnumb4:",scalar @guns,"\n";
 	@guns = @temp_guns;
+    warn "gunnumaftr:",scalar @guns,"\n";
 }
 
 
