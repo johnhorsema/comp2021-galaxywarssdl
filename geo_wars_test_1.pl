@@ -14,7 +14,7 @@ use SDLx::Sprite;
 
 
 #Set-Up Window
-my ($width, $height) = (640, 480);
+my ($width, $height) = (800, 600);
 my $app = SDLx::App->new( w => $width, h => $height, d => 32, title => 'Geometry Wars',
 						  exit_on_quit => 1,
 						  dt => 0.025);
@@ -31,23 +31,28 @@ $bg->load('bg.png');
 my $start_game = 0;
 
 #Creating a Triangle to use as player sprite. 
-my $playersize = 20;
-my $playersprite = SDLx::Sprite->new ( width => $playersize+1, height => $playersize+1 );
-$playersprite->surface->draw_line([$playersize/2,0], [0,$playersize], [255, 255,0,255]);
-$playersprite->surface->draw_line([$playersize/2,0], [$playersize,$playersize], [255, 255,0,255]);
-$playersprite->surface->draw_line([0,$playersize], [$playersize/2,4*$playersize/5], [0, 255,0,255]);
-$playersprite->surface->draw_line([$playersize,$playersize], [$playersize/2,4*$playersize/5], [0, 255,0,255]);
+my $playersize = 35;
+my $playersprite = SDLx::Sprite->new ( width => $playersize, height => $playersize*1.6 );
+#Resise ship to 40x40
+`convert ship.png -resize 35x56 ship_01.png`;
+$playersprite->load('ship_01.png');
 
+#$playersprite->surface->draw_line([$playersize/2,0], [0,$playersize], [255, 255,0,255]);
+#$playersprite->surface->draw_line([$playersize/2,0], [$playersize,$playersize], [255, 255,0,255]);
+#$playersprite->surface->draw_line([0,$playersize], [$playersize/2,4*$playersize/5], [0, 255,0,255]);
+#$playersprite->surface->draw_line([$playersize,$playersize], [$playersize/2,4*$playersize/5], [0, 255,0,255]);
+
+#Player spawn at center
 $playersprite->draw_xy($app, $app->w /2, $app->h /2);
 #Resize mask.png to 40x40
-`convert mask.png -resize 40x40 example.png`;
+`convert alien.png -resize 40x60 alien_01.png`;
 
 #Creating a list to hold all enemy object instances
 my @enemy_instances = ();
 my @enemy_sprites = ();
  
 my $enemy_1 = SDLx::Sprite->new ( width => $playersize+1, height => $playersize+1 );
-$enemy_1->load('example.png');
+$enemy_1->load('alien_01.png');
 $enemy_sprites[0] = $enemy_1;
 
 my $boundary = SDLx::Rect->new(25, 25, $app->w - 50, $app->h - 50);
@@ -84,17 +89,16 @@ sub start_screen {
 sub check_boundary {
 	my ($A) = @_;
 	#Checking for boundary 
-	$A->{ship}->x < 14 && $A->{v_x} < 0 && ($A->{v_x} = 0);
-    $A->{ship}->y < 14 && $A->{v_y} < 0 && ($A->{v_y} = 0);
-    $A->{ship}->x > $app->w - 35 && $A->{v_x} > 0 && ($A->{v_x} = 0);
-    $A->{ship}->y > $app->h - 35 && $A->{v_y} > 0 && ($A->{v_y} = 0);
+	$A->{ship}->x < 5 && $A->{v_x} < 0 && ($A->{v_x} = 0);
+    $A->{ship}->y < 10 && $A->{v_y} < 0 && ($A->{v_y} = 0);
+    $A->{ship}->x > $app->w - 40 && $A->{v_x} > 0 && ($A->{v_x} = 0);
+    $A->{ship}->y > $app->h - 60 && $A->{v_y} > 0 && ($A->{v_y} = 0);
 }
 
 sub reset_game {
-    $app->draw_rect( [ 0, 0, $app->w, $app->h ], 0x22114200 );
-    $app->draw_rect( [ 10, 10, $app->w-20, $app->h-20 ], 0x000000 );
+    $app->draw_rect( [ 0, 0, $app->w-20, $app->h-20 ], 0x000000 );
     #Render bg img
-    $bg->draw_xy( $app, 10, 10 );
+    $bg->draw_xy( $app, 0, 0 );
 }
 
 $app->add_event_handler(
@@ -122,7 +126,7 @@ $app->add_event_handler(
                 # create gun instance and push
                 my $gun_ = {
                     p_y => $player->{ship}->y,
-                    p_x => $player->{ship}->x,
+                    p_x => $player->{ship}->x+15,
                     color => $colors[$weapon_lvl],
                     velocity => 10 * ($weapon_lvl+1),
                     diameter => 3 * ($weapon_lvl+1),
@@ -164,7 +168,7 @@ $app->add_move_handler( sub {
     foreach $gun (@guns){
         $gun->{p_y} -= $gun->{velocity} * $step;
         # Swerve the shot horizontally
-        $gun->{p_x} += 1.1 * $player->{v_x} * $step;
+        $gun->{p_x} += 0.4 * $player->{v_x} * $step;
         if ($gun->{p_y} > $app->h - 35) {splice(@guns,$counter,1)};
         $counter++;
     }
