@@ -52,8 +52,7 @@ $playersprite->draw_xy($app, $app->w /2, $app->h /2);
 my @enemy_instances = ();
 my @enemy_sprites = ();
  
-my $enemy_1 = SDLx::Sprite->new ( width => $playersize+1, height => $playersize+1 );
-$enemy_1->load('alien_01.png');
+my $enemy_1 = SDLx::Sprite->new ( width => $playersize+1, height => $playersize+1, image=>'alien_01.png');
 $enemy_sprites[0] = $enemy_1;
 
 my $boundary = SDLx::Rect->new(25, 25, $app->w - 50, $app->h - 50);
@@ -148,6 +147,7 @@ $app->add_event_handler(
             {
 				create_enemy();
 				load_enemies();
+				#$app->update;
 			}
             if ( $event->key_sym == SDLK_UP ) {
                 $player->{v_y} = -7;
@@ -219,9 +219,8 @@ $app->add_move_handler( sub {
 #Create Enemy
 sub create_enemy 
 {
-	my @spr = map {$enemy_sprites[int(rand(scalar(@enemy_sprites))) ]} 1;
 	my $enem = {
-    sprite => $spr[0],
+    sprite => SDLx::Sprite->new ( width => $playersize+1, height => $playersize+1, image=>'alien_01.png'),
     v_y    => 0, #Change to something more appropriate
     v_x	   => 0,
 	};
