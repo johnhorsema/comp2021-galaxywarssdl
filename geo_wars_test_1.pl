@@ -95,6 +95,38 @@ sub check_boundary {
     $A->{ship}->y > $app->h - 60 && $A->{v_y} > 0 && ($A->{v_y} = 0);
 }
 
+sub check_enemy_shot {
+	foreach my $inst (@enemy_instances) {
+		foreach my $shot (@guns) {
+			if ((($shot->{p_x}-$inst->{sprite}->x)**2 + ($shot->{p_y}-$inst->{sprite}->y)**2) < 50  )
+			{
+				
+			print "\n",(($shot->{p_x}-$inst->{sprite}->x)**2 + ($shot->{p_y}-$inst->{sprite}->y)**2);
+				$inst->{sprite}->alpha(0);
+				foreach my $i (0..(-1 + scalar @enemy_instances))
+				{
+					if( \$inst == \$enemy_instances[$i])
+					{
+						delete $enemy_instances[$i];
+					}
+				}
+			} 
+				
+		}
+	}
+}
+
+sub delete_gun {
+	foreach my $i (0..(-1 + scalar @guns))
+	{
+		if ($guns[$i]->{p_y} < 10)
+		{
+			delete $guns[$i];
+		}
+	}
+}
+
+
 sub reset_game {
     $app->draw_rect( [ 0, 0, $app->w-20, $app->h-20 ], 0x000000 );
     #Render bg img
@@ -177,13 +209,15 @@ $app->add_move_handler( sub {
 #Create Enemy
 sub create_enemy 
 {
+	my @spr = map {$enemy_sprites[int(rand(scalar(@enemy_sprites))) ]} 1;
 	my $enem = {
-    sprite => $enemy_sprites[int(rand(scalar(@enemy_sprites))) ],
-    v_y    => rand(2)-1, #Change to something more appropriate
-    v_x	   => rand(2)-1,
+    sprite => $spr[0],
+    v_y    => 0, #Change to something more appropriate
+    v_x	   => 0,
 	};
-	$enem->{sprite}->draw_xy($app, $app->w /2, $app->h /2);
+	$enem->{sprite}->draw_xy($app, rand($app->w), 10 + rand($app->h/2) );
 	push @enemy_instances, $enem; 
+	print scalar @enemy_instances;
 }
 
 #Load all enemies
@@ -215,13 +249,18 @@ $app->add_show_handler(
             # then we render each ship
             #$app->draw_rect( $player->{ship}, 0xFF0000FF );
             $playersprite->draw($app);
+            
+            if(int rand 100 == 1)
+            {create_enemy();}
             # then we render enemies
             load_enemies();
+            
             # then we render the guns
             my $gun;
             foreach $gun (@guns){
                 $app->draw_rect( [ $gun->{p_x}, $gun->{p_y}, $gun->{diameter}, $gun->{diameter}*2 ], $gun->{color} );
             }
+            check_enemy_shot();
         }
 
         # finally, we update the screen
