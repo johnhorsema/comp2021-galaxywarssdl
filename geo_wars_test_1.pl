@@ -16,6 +16,7 @@ use SDL::Mixer;
 use SDL::Mixer::Channels;
 use SDL::Mixer::Samples;
 
+
 #Set-Up Window
 my ($width, $height) = (800, 600);
 my $app = SDLx::App->new( w => $width, h => $height, d => 32, title => 'Galaxy Wars SDL',
@@ -48,7 +49,8 @@ my $beam = SDLx::Sprite->new(width => 90, height => $app->h);
 $beam->load('beam.png');
 
 my $start_game = 0;
-
+my $start_time = time;
+my $level = 0;
 #Creating a Triangle to use as player sprite. 
 my $playersize = 35;
 my $playersprite = SDLx::Sprite->new ( width => $playersize, height => $playersize*1.6 );
@@ -333,7 +335,7 @@ sub load_enemies
 	foreach my $inst (@enemy_instances) {
 		$app->add_move_handler( sub {
 			my ( $step, $app ) = @_;
-			if(int rand 300 == 1)
+			if(1+ int rand (300-5*(time-$start_time)) == 1)
 			{
 				$inst->{sprite}->y( int($inst->{sprite}->y + ( $inst->{v_y} )) );
 			}
@@ -382,7 +384,8 @@ $app->add_show_handler(
                 $beam->draw_xy($app, $player->{ship}->x-28, $player->{ship}->y-600);
             }
             
-            if(int rand 500 == 1 || scalar @enemy_instances == 1)
+            
+            if(1+ int rand(500-(time-$start_time)) == 1 || scalar @enemy_instances == 1)
             {create_enemy();}
             # then we render enemies
             load_enemies();
