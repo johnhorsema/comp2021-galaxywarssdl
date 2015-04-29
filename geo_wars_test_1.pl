@@ -15,14 +15,14 @@ use SDLx::Sprite;
 
 #Set-Up Window
 my ($width, $height) = (800, 600);
-my $app = SDLx::App->new( w => $width, h => $height, d => 32, title => 'Geometry Wars',
+my $app = SDLx::App->new( w => $width, h => $height, d => 32, title => 'Galaxy Wars SDL',
 						  exit_on_quit => 1,
 						  dt => 0.025);
 
 #Create cover
 my $cover = SDLx::Surface->load('cover.png');
 #Cover text
-my $covertxt = SDLx::Text->new(x => $width/4, y => $height/2, font => 'font.ttf');
+my $covertxt = SDLx::Text->new(x => ($width-340)/2, y => $height/2, font => 'font.ttf', h_align => 'right', text => '- Press any key to start -' );
 
 #Create background
 my $bg = SDLx::Sprite->new(width => $width-20, height => $height-20);
@@ -44,7 +44,8 @@ $playersprite->load('ship_01.png');
 
 #Player spawn at center
 $playersprite->draw_xy($app, $app->w /2, $app->h /2);
-#Resize mask.png to 40x40
+
+#Resize alien.png to 40x60
 `convert alien.png -resize 40x60 alien_01.png`;
 
 #Creating a list to hold all enemy object instances
@@ -83,7 +84,7 @@ create_enemy();
 
 sub start_screen {
     $cover->blit( $app );
-    $covertxt->write_to( $app, '- Press any key to start -' );
+    $covertxt->write_to( $app );
 }
 
 sub check_boundary {
@@ -98,10 +99,9 @@ sub check_boundary {
 sub check_enemy_shot {
 	foreach my $inst (@enemy_instances) {
 		foreach my $shot (@guns) {
+        			warn "\n shot?",(($shot->{p_x}-$inst->{sprite}->x)**2 + ($shot->{p_y}-$inst->{sprite}->y)**2);
 			if ((($shot->{p_x}-$inst->{sprite}->x)**2 + ($shot->{p_y}-$inst->{sprite}->y)**2) < 50  )
 			{
-				
-			print "\n",(($shot->{p_x}-$inst->{sprite}->x)**2 + ($shot->{p_y}-$inst->{sprite}->y)**2);
 				$inst->{sprite}->alpha(0);
 				foreach my $i (0..(-1 + scalar @enemy_instances))
 				{
@@ -217,7 +217,7 @@ sub create_enemy
 	};
 	$enem->{sprite}->draw_xy($app, rand($app->w), 10 + rand($app->h/2) );
 	push @enemy_instances, $enem; 
-	print scalar @enemy_instances;
+	warn "num of enemies:",scalar @enemy_instances;
 }
 
 #Load all enemies
@@ -246,8 +246,7 @@ $app->add_show_handler(
         else{
             # first, we clear the screen
             reset_game();
-            # then we render each ship
-            #$app->draw_rect( $player->{ship}, 0xFF0000FF );
+            # then we render player ship
             $playersprite->draw($app);
             
             if(int rand 100 == 1)
