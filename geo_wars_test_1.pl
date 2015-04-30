@@ -286,6 +286,10 @@ $app->add_event_handler(
                 
                 # gun velocity and size increases with weapon level
                 $gun_num += 1;
+                # check score and upgrade weapon
+                if($player->{score}>0 && $player->{score}%100==0 && $weapon_lvl<3){
+                    $weapon_lvl++;
+                }
                 # create gun instance and push
                 my $gun_ = {
                     p_y => $player->{ship}->y,
