@@ -153,7 +153,7 @@ sub check_death {
 
 sub check_enemy_shot {
 	foreach my $inst (@enemy_instances) {
-        if($player->{beamOn} && ($inst->{sprite}->x-$player->{ship}->x)**2 < 90){
+        if($player->{beamOn} && abs($inst->{sprite}->x-$player->{ship}->x) < 60){
                 if($inst->{shieldOn}){
                     $inst->{shieldOn}=0;
                     $player->{score}+=10;
@@ -174,6 +174,10 @@ sub check_enemy_shot {
                     }
                     @enemy_instances = @temp_enems;
                     undef @temp_enems;
+                }
+                # check score and upgrade weapon
+                if($player->{score}>0 && $player->{score}%100==0 && $weapon_lvl<3){
+                    $weapon_lvl++;
                 }
         }
 		foreach my $shot (@guns) {
@@ -216,6 +220,11 @@ sub check_enemy_shot {
 				}
 				@guns = @temp_guns;
 				undef @temp_guns;
+                
+                # check score and upgrade weapon
+                if($player->{score}>0 && $player->{score}%100==0 && $weapon_lvl<3){
+                    $weapon_lvl++;
+                }
 			}
 				
 		}
@@ -436,13 +445,9 @@ $app->add_show_handler(
             # then we render the guns
             my $gun;
             foreach $gun (@guns){
-                $app->draw_rect( [ $gun->{p_x}, $gun->{p_y}, 3, 6 ], $gun->{color} );
+                $app->draw_rect( [ $gun->{p_x}, $gun->{p_y}, 3, 6+0.1*$weapon_lvl ], $gun->{color} );
             }
             check_enemy_shot();
-            # check score and upgrade weapon
-            if($player->{score}>0 && $player->{score}%100==0 && $weapon_lvl<3){
-                $weapon_lvl++;
-            }
             check_death();
             delete_gun();
         }
