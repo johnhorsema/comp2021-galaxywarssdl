@@ -91,7 +91,8 @@ my $player = {
     v_y    => 0,
     v_x	   => 0,
     score  => 0,
-    lives  => 3
+    lives  => 3,
+    beamOn => 0
 };
 
 my @colors = (
@@ -292,17 +293,12 @@ $app->add_event_handler(
                 
                 # gun velocity and size increases with weapon level
                 $gun_num += 1;
-                # check score and upgrade weapon
-                if($player->{score}>0 && $player->{score}%100==0 && $weapon_lvl<3){
-                    $weapon_lvl++;
-                }
                 # create gun instance and push
                 my $gun_ = {
                     p_y => $player->{ship}->y,
                     p_x => $player->{ship}->x+15,
                     color => $colors[$weapon_lvl],
                     velocity => 10 * ($weapon_lvl+1),
-                    diameter => 3 * ($weapon_lvl+1),
                 };
                 push(@guns, $gun_);
                 
@@ -356,7 +352,6 @@ sub create_enemy
     sprite => SDLx::Sprite->new ( width => $playersize+1, height => $playersize+1, image=>'alien_01.png' ),
     v_y    => 1, #Change to something more appropriate
     v_x	   => 0,
-    beamOn => 0,
     shieldOn => 0,
     shield => SDLx::Sprite->new ( width => $playersize+1, height => $playersize+1, image=>'alien_shield_01.png' ),
 	};
@@ -423,10 +418,15 @@ $app->add_show_handler(
             # then we render player ship
             $playersprite->draw($app);
             # beam on!
-            if($player->{beamOn}){
+            if($player->{beamOn} && $player->{beamTime} < 200){
                 $beam->draw_xy($app, $player->{ship}->x-28, $player->{ship}->y-600);
+                $player->{beamTime}++;
+                warn "Beamtime: ",$player->{beamTime};
             }
-            
+            else{
+                $player->{beamOn} = 0;
+                $player->{beamTime} = 0;
+            }
             
             if(1+ int rand(500-(time-$start_time)) == 1 || scalar @enemy_instances == 1)
             {create_enemy();}
@@ -436,9 +436,13 @@ $app->add_show_handler(
             # then we render the guns
             my $gun;
             foreach $gun (@guns){
-                $app->draw_rect( [ $gun->{p_x}, $gun->{p_y}, $gun->{diameter}, $gun->{diameter}*2 ], $gun->{color} );
+                $app->draw_rect( [ $gun->{p_x}, $gun->{p_y}, 3, 6 ], $gun->{color} );
             }
             check_enemy_shot();
+            # check score and upgrade weapon
+            if($player->{score}>0 && $player->{score}%100==0 && $weapon_lvl<3){
+                $weapon_lvl++;
+            }
             check_death();
             delete_gun();
         }
