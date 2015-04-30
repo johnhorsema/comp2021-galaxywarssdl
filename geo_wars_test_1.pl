@@ -15,6 +15,7 @@ use SDLx::Sound;
 use SDL::Mixer;
 use SDL::Mixer::Channels;
 use SDL::Mixer::Samples;
+use SDL::Mixer::Music;
 
 
 #Set-Up Window
@@ -33,12 +34,15 @@ my $bg = SDLx::Sprite->new(width => $width-20, height => $height-20);
 $bg->load('bg.png');
 
 #Create sound object
- SDL::init(SDL_INIT_AUDIO);
- SDL::Mixer::open_audio( 44100, SDL::Constants::AUDIO_S16, 2, 4096);
- SDL::Mixer::Channels::allocate_channels(4);
- my $laser = SDL::Mixer::Samples::load_WAV('laser.wav');
- my $explode = SDL::Mixer::Samples::load_WAV('explosion.wav');
- 
+SDL::init(SDL_INIT_AUDIO);
+SDL::Mixer::open_audio( 44100, SDL::Constants::AUDIO_S16, 2, 4096);
+SDL::Mixer::Channels::allocate_channels(4);
+my $laser = SDL::Mixer::Samples::load_WAV('laser.wav');
+my $explode = SDL::Mixer::Samples::load_WAV('explosion.wav');
+my $coverbgm = SDL::Mixer::Music::load_MUS('imperial8bit.mp3');
+my $bgm = SDL::Mixer::Music::load_MUS('sw8bit.mp3');
+
+SDL::Mixer::Music::play_music($coverbgm , 10 );
 
 #Scoring
 my $scoretxt = SDLx::Text->new(x => $app->w-200, y => 10, font => 'font.ttf', text => 'Score:' );
@@ -68,8 +72,8 @@ $playersprite->draw_xy($app, $app->w /2, $app->h - 60);
 #Resize alien.png to 40x60
 `convert alien_shield.png -resize 40x60 alien_shield_01.png`;
 
-#Resize explode to 40x60
-`convert alien_explode.png -resize 40x60 alien_explode_01.png`;
+#Resize explode to 50x70
+`convert alien_explode.png -resize 50x70 alien_explode_01.png`;
 
 
 #Creating a list to hold all enemy object instances
@@ -148,6 +152,28 @@ sub check_death {
 
 sub check_enemy_shot {
 	foreach my $inst (@enemy_instances) {
+        if($player->{beamOn} && ($inst->{sprite}->x-$player->{ship}->x)**2 < 90){
+                if($inst->{shieldOn}){
+                    $inst->{shieldOn}=0;
+                    $player->{score}+=10;
+                }
+                else{
+                    my @temp_enems = ();
+                    foreach my $i (0..(-1 + scalar @enemy_instances))
+                    {
+                        if( \$inst != \$enemy_instances[$i])
+                        {
+                            $player->{score}+=10;
+                            push @temp_enems, $enemy_instances[$i];
+                        }
+                        else
+                        {
+                            delete $enemy_instances[$i];
+                        }
+                    }
+                    @enemy_instances = @temp_enems;
+                }
+        }
 		foreach my $shot (@guns) {
 			if (((-20 + $shot->{p_x}-$inst->{sprite}->x)**2 + ($shot->{p_y}-$inst->{sprite}->y)**2) < 350)
 			{
@@ -223,6 +249,9 @@ $app->add_event_handler(
 		my ( $event, $app ) = @_;
         if ( $event->type == SDL_KEYDOWN ) {
             if(!$start_game){
+                sleep(1);
+                SDL::Mixer::Music::halt_music();
+                SDL::Mixer::Music::play_music($bgm , 10 );
                 $start_game = 1;
             }
             if($event->key_sym == SDLK_p)
@@ -235,6 +264,10 @@ $app->add_event_handler(
             {
                 $player->{beamOn} = 1;
 			}
+            if($event->key_sym == SDLK_r){
+                $player->{score} = 0;
+                reset_game();
+            }
             if ( $event->key_sym == SDLK_UP ) {
                 $player->{v_y} = -7;
             }
