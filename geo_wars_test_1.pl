@@ -20,7 +20,7 @@ use SDL::Mixer::Music;
 
 #Set-Up Window
 my ($width, $height) = (800, 600);
-my $app = SDLx::App->new( w => $width, h => $height, d => 32, title => 'Galaxy Wars SDL',
+my $app = SDLx::App->new( w => $width, h => $height, d => 8, title => 'Galaxy Wars SDL',
 						  exit_on_quit => 1,
 						  dt => 0.025);
 
@@ -142,7 +142,7 @@ sub check_death {
 				{$app->delay(200);}
 			else
 				{$app->delay(1000);
-					SDL::quit;}
+					exit;}
 			delete  $enemy_instances[$i];
 		}
 	} 
@@ -172,10 +172,11 @@ sub check_enemy_shot {
                         }
                     }
                     @enemy_instances = @temp_enems;
+                    undef @temp_enems;
                 }
         }
 		foreach my $shot (@guns) {
-			if (((-20 + $shot->{p_x}-$inst->{sprite}->x)**2 + ($shot->{p_y}-$inst->{sprite}->y)**2) < 350)
+			if (((-20 + $shot->{p_x}-$inst->{sprite}->x)**2 + (0.3*($shot->{p_y}-$inst->{sprite}->y))**2) < 350)
 			{
                 if($inst->{shieldOn}){
                     $inst->{shieldOn}=0;
@@ -196,6 +197,7 @@ sub check_enemy_shot {
                         }
                     }
                     @enemy_instances = @temp_enems;
+					undef @temp_enems;
                 }
 
 				#Delete the bullet that hit the ship
@@ -212,6 +214,7 @@ sub check_enemy_shot {
 					}
 				}
 				@guns = @temp_guns;
+				undef @temp_guns;
 			}
 				
 		}
@@ -232,6 +235,7 @@ sub delete_gun {
 		}
 	}
 	@guns = @temp_guns;
+	undef @temp_guns;
 }
 
 
@@ -259,6 +263,7 @@ $app->add_event_handler(
 				create_enemy();
 				load_enemies();
 				#$app->update;
+				
 			}
             if($event->key_sym == SDLK_b)
             {
@@ -266,7 +271,8 @@ $app->add_event_handler(
 			}
             if($event->key_sym == SDLK_r){
                 $player->{score} = 0;
-                reset_game();
+                undef @guns;
+                undef @enemy_instances;
             }
             if ( $event->key_sym == SDLK_UP ) {
                 $player->{v_y} = -7;
@@ -360,7 +366,7 @@ sub create_enemy
         $enem->{shield}->draw_xy($app, $enem->{sprite}->x, $enem->{sprite}->y );
     }
 	push @enemy_instances, $enem; 
-	warn "num of enemies:",scalar @enemy_instances;
+	#warn "num of enemies:",scalar @enemy_instances;
 }
 
 #Load all enemies
