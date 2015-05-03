@@ -47,6 +47,8 @@ SDL::Mixer::Music::play_music($coverbgm , 10 );
 #Scoring
 my $scoretxt = SDLx::Text->new(x => $app->w-200, y => 10, font => 'font.ttf', text => 'Score:' );
 my $scorevaluetxt = SDLx::Text->new(x => $app->w-80, y => 10, font => 'font.ttf');
+my $energytxt = SDLx::Text->new(x => $app->w-200, y => 30, font => 'font.ttf', text => 'Energy:' );
+my $energyvaluetxt = SDLx::Text->new(x => $app->w-80, y => 30, font => 'font.ttf'); 
 
 #Beam
 my $beam = SDLx::Sprite->new(width => 90, height => $app->h);
@@ -91,6 +93,7 @@ my $player = {
     v_y    => 0,
     v_x	   => 0,
     score  => 0,
+    energy => 0,
     lives  => 3,
     beamOn => 0
 };
@@ -176,7 +179,7 @@ sub check_enemy_shot {
                     undef @temp_enems;
                 }
                 # check score and upgrade weapon
-                if($player->{score}>0 && $player->{score}%100==0 && $weapon_lvl<3){
+                if($player->{score}>0 && $player->{score}%200==0 && $weapon_lvl<3){
                     $weapon_lvl++;
                 }
         }
@@ -222,7 +225,7 @@ sub check_enemy_shot {
 				undef @temp_guns;
                 
                 # check score and upgrade weapon
-                if($player->{score}>0 && $player->{score}%100==0 && $weapon_lvl<3){
+                if($player->{score}>0 && $player->{score}%200==0 && $weapon_lvl<3){
                     $weapon_lvl++;
                 }
 			}
@@ -256,6 +259,9 @@ sub reset_game {
     $scoretxt->write_to( $app );
     $scorevaluetxt->text($player->{score});
     $scorevaluetxt->write_to( $app );
+    $energytxt->write_to( $app );
+    $energyvaluetxt->text($player->{energy});
+    $energyvaluetxt->write_to( $app );
 }
 
 $app->add_event_handler(
@@ -307,7 +313,7 @@ $app->add_event_handler(
                     p_y => $player->{ship}->y,
                     p_x => $player->{ship}->x+15,
                     color => $colors[$weapon_lvl],
-                    velocity => 10 * ($weapon_lvl+1),
+                    velocity => 10 + $weapon_lvl*2,
                 };
                 push(@guns, $gun_);
                 
@@ -392,6 +398,7 @@ sub load_enemies
 		{
 			#Lose points for allowing enemy to pass
 			$player->{score}-=20;
+            $player->{energy}/=2;
 			
 			my @temp_enems = ();
 			foreach my $i (0..(-1 + scalar @enemy_instances))
@@ -426,13 +433,19 @@ $app->add_show_handler(
             reset_game();
             # then we render player ship
             $playersprite->draw($app);
+            # add energy
+            if(int rand(100)%20 == 0){
+                $player->{energy}++;
+            }
             # beam on!
-            if($player->{beamOn} && $player->{beamTime} < 200){
-                $beam->draw_xy($app, $player->{ship}->x-28, $player->{ship}->y-600);
+            if($player->{beamOn} && $player->{beamTime} < 120 && $player->{energy}>100){
+                $beam->draw_xy($app, $player->{ship}->x-28, $player->{ship}->y-620);
                 $player->{beamTime}++;
-                warn "Beamtime: ",$player->{beamTime};
             }
             else{
+                if($player->{beamOn} && $player->{energy}>100){
+                    $player->{energy}-=100;
+                }
                 $player->{beamOn} = 0;
                 $player->{beamTime} = 0;
             }
