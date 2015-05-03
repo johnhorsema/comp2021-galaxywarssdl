@@ -74,8 +74,8 @@ $playersprite->draw_xy($app, $app->w /2, $app->h - 60);
 #Resize alien.png to 40x60
 `convert alien_shield.png -resize 40x60 alien_shield_01.png`;
 
-#Resize explode to 50x70
-`convert alien_explode.png -resize 50x70 alien_explode_01.png`;
+#Resize explode to 60x80
+`convert alien_explode.png -resize 100x110 alien_explode_01.png`;
 
 
 #Creating a list to hold all enemy object instances
@@ -93,7 +93,7 @@ my $player = {
     v_y    => 0,
     v_x	   => 0,
     score  => 0,
-    energy => 0,
+    energy => 100,
     lives  => 3,
     beamOn => 0
 };
@@ -138,12 +138,12 @@ sub check_death {
 		}  
 		else
 		{
-			SDLx::Sprite->new ( width => $playersize+1, height => $playersize+1, image=>'alien_explode_01.png')->draw_xy($app, $enemy_instances[$i]->{sprite}->x, $enemy_instances[$i]->{sprite}->y);
+            SDLx::Sprite->new ( width => $playersize+1, height => $playersize+1, image=>'alien_explode_01.png')->draw_xy($app, $enemy_instances[$i]->{sprite}->x-20, $enemy_instances[$i]->{sprite}->y-40);
 			SDL::Mixer::Channels::play_channel(-1, $explode , 0 );
 			$app->update;
 			$player->{lives}-=1;
 			if($player->{lives} > 0)
-				{$app->delay(200);}
+				{$app->delay(250);}
 			else
 				{$app->delay(1000);
 					exit;}
@@ -168,6 +168,9 @@ sub check_enemy_shot {
                         if( \$inst != \$enemy_instances[$i])
                         {
                             $player->{score}+=10;
+                            if(!$player->{beamOn}){
+                                $player->{energy}+=5;
+                            }
                             push @temp_enems, $enemy_instances[$i];
                         }
                         else
@@ -197,6 +200,9 @@ sub check_enemy_shot {
                         if( \$inst != \$enemy_instances[$i])
                         {
                             $player->{score}+=10;
+                            if(!$player->{beamOn}){
+                                $player->{energy}+=5;
+                            }
                             push @temp_enems, $enemy_instances[$i];
                         }
                         else
@@ -269,7 +275,7 @@ $app->add_event_handler(
 		my ( $event, $app ) = @_;
         if ( $event->type == SDL_KEYDOWN ) {
             if(!$start_game){
-                sleep(1);
+                sleep(0.5);
                 SDL::Mixer::Music::halt_music();
                 SDL::Mixer::Music::play_music($bgm , 10 );
                 $start_game = 1;
@@ -398,7 +404,8 @@ sub load_enemies
 		{
 			#Lose points for allowing enemy to pass
 			$player->{score}-=20;
-            $player->{energy}/=2;
+            #Energy penalty
+            $player->{energy} = int($player->{energy}/2);
 			
 			my @temp_enems = ();
 			foreach my $i (0..(-1 + scalar @enemy_instances))
@@ -433,17 +440,13 @@ $app->add_show_handler(
             reset_game();
             # then we render player ship
             $playersprite->draw($app);
-            # add energy
-            if(int rand(100)%20 == 0){
-                $player->{energy}++;
-            }
             # beam on!
-            if($player->{beamOn} && $player->{beamTime} < 120 && $player->{energy}>100){
+            if($player->{beamOn} && $player->{beamTime} < 120 && $player->{energy}>99){
                 $beam->draw_xy($app, $player->{ship}->x-28, $player->{ship}->y-620);
                 $player->{beamTime}++;
             }
             else{
-                if($player->{beamOn} && $player->{energy}>100){
+                if($player->{beamOn} && $player->{energy}>99){
                     $player->{energy}-=100;
                 }
                 $player->{beamOn} = 0;
