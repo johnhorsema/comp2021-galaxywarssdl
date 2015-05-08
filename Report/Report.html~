@@ -391,7 +391,7 @@ Collision
 <div id="content">
 Collision between sprites was handled by implementing simple Euclidean geometry. We find the distance between the position of one object and another and this distance factor depends on the type of colliding object. We can categorize these as:
 <p>
-<img src="coll1.png" class="img-relativelayout-l2">(i) Player - Enemy
+<img src="beam.png" class="img-relativelayout-l2">(i) Player - Enemy
 </img>
 </p>
 <p>
