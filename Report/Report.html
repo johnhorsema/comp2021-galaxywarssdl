@@ -389,17 +389,22 @@ Collision
 </div>
 
 <div id="content">
-Collision between sprites was handled by implementing simple Euclidean geometry. We find the distance between the position of one object and another and this distance factor depends on the type of colliding object. We can categorize these as:
+Collision between sprites was handled by implementing simple Euclidean geometry. We find the distance between the position of one object and another and this distance factor depends on the type of colliding object. Each collision is handled differently. We can categorize these as:
 <p>
-<img src="coll1.png" class="img-relativelayout-l2">(i) Player - Enemy
+<img src="coll1.png" class="img-relativelayout-l2">(i) Player - Enemy: This collision triggers the explosion of the player ship. We do this by simply overlaying the picture of an explosion cloud over the position of the ship. We also reduce the number of lives of the player by 1. This is because we have limited the number of collisions the player can withstand to be 3. 
 </img>
 </p>
+<br>
 <p>
-(ii)Enemy  - Bullet
+(ii)Enemy  - Bullet: An enemy - bullet collision triggers code that despawns both of these objects immediately. The score is increased by 10 points for a normal enemy and 50 for an armoured ship. 
 </p>
+
+<br>
 <p>
-(iii)Enemy - Beam
+(iii)Enemy - Beam: Similar to enemy bullet this despawns the enemy ship however the beam is not stopped.   
 </p>
+
+
 <pre>
 </pre>
 </div>
