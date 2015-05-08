@@ -199,6 +199,7 @@ pre{
 	background-color: #eee;
 	padding: 5px;
 	width: 650px;
+	word-wrap: break-word;
 }
 .img-relativelayout-s{
 	border: none;
@@ -275,6 +276,13 @@ Home
 <p>
 Welcome to the Final Report page for COMP2021 Galaxy Wars SDL. Navigate by the sidebar on the left.
 </p>
+<p>
+This project is curated by:
+<ul>
+<li>IYER, Arvind</li>
+<li>MA, Jonathan Chuan-en</li>
+<ul>
+</p>
 </td>
 <td>
 <img src="cover.png"></img>
@@ -319,6 +327,25 @@ Idea Development
 <div id="content">
 <p>
 <img src="alien.png" class="img-relativelayout-s"></img>
+Data structure for enemy:</p>
+<pre>
+my $enem = {
+    sprite => SDLx::Sprite->new (
+		width => $playersize+1,
+		height => $playersize+1,
+		image=>'alien_01.png' 
+	),
+    v_y    => 1,
+    v_x	   => 0,
+    shieldOn => 0,
+    shield => SDLx::Sprite->new (
+		width => $playersize+1,
+		height => $playersize+1,
+		image=>'alien_shield_01.png' 
+	),
+};
+</pre>
+<p>
 In terms of graphics, the enemy ship has a streamlined body and greenish-blue highlights to indicate they use alien technology.</p>
 <p>
 In terms of game mechanics, the enemy ship is always moving towards the bottom of the screen (where the warp hole is) at a random speed, which will increase as the game continues.</p>
@@ -335,8 +362,44 @@ Using the random function, the enemy ship's movement speed (indicated by the <i>
 </p>
 
 </div>
+<h2 class="subheading">On the player...</h2>
+<div id="content">
+<p>
+<img src="ship.png" class="img-relativelayout-s"></img>
+<p>Data structure for player:</p>
+<pre>
+my $player = {
+    ship => $playersprite,
+    v_y    => 0,
+    v_x	   => 0,
+    score  => 0,
+    energy => 100,
+    lives  => 3,
+    beamOn => 0
+};
+</pre>
+</p>
+</div>
 <h2 class="subheading">On the weapon...</h2>
 <div id="content">
+<p>Data structure for gun:</p>
+<pre>
+my $player = {
+    ship => $playersprite,
+    v_y    => 0,
+    v_x	   => 0,
+    score  => 0,
+    energy => 100,
+    lives  => 3,
+    beamOn => 0
+};
+</pre>
+<p>Initialization of the gun:</p>
+<pre>
+my $gun_num = 0;
+my @guns;
+my $weapon_lvl = 0;
+</pre>
 <p>
 <img src="gun.png" class="img-relativelayout-l"></img>
 In terms of graphics, the weapon produces gunshots that are small rectangles generated from the object creation method in the <i>SDL::Sprite</i> module.</p>
@@ -374,12 +437,10 @@ Movement
 </div>
 
 <div id="content">
-
-For movement of the player, we use a simple system where input from the arrow keys on the keyboard sets a velocity to the player's ship according to the buttons that were pressed. 
-
-On the other hand, the movement of enemy ships is made to be slightly unpredictable by adding in a random velocity factor which makes sure that the velocity keeps changing. This increases the difficulty while also making the game less predictable. 
-<pre>
-</pre>
+<p>
+For movement of the player, we use a simple system where input from the arrow keys on the keyboard sets a velocity to the player's ship according to the buttons that were pressed.</p>
+<p>On the other hand, the movement of enemy ships is made to be slightly unpredictable by adding in a random velocity factor which makes sure that the velocity keeps changing. This increases the difficulty while also making the game less predictable. 
+</p>
 </div>
 
 <div class="row">
@@ -389,19 +450,16 @@ Collision
 </div>
 
 <div id="content">
-Collision between sprites was handled by implementing simple Euclidean geometry. We find the distance between the position of one object and another and this distance factor depends on the type of colliding object. We can categorize these as:
 <p>
-<img src="coll1.png" class="img-relativelayout-l2">(i) Player - Enemy
-</img>
-</p>
+<img src="colli.png" class="img-relativelayout-s"></img>
+Collision between sprites was handled by implementing simple Euclidean geometry. We find the distance between the position of one object and another and this distance factor depends on the type of colliding object.</p>
 <p>
-(ii)Enemy  - Bullet
+We can categorize these as:
 </p>
-<p>
-(iii)Enemy - Beam
-</p>
-<pre>
-</pre>
+<p>(i) Player - Enemy<br>
+(ii) Enemy - Bullet<br>
+(iii) Enemy - Beam
+</p> 
 </div>
 
 <div class="row">
@@ -411,13 +469,9 @@ Score Calculation
 </div>
 
 <div id="content">
-
-For killing every normal opponent (without shield), the player gets +10 points. 
-Breaking a fortified opponent's shield awards the player +10 points as well. 
-Killing a fortified opponent awards the player +50 points.
-Allowing an enemy to pass the base of the screen results in -10 points. 
-<pre>
-</pre>
+<p>
+For killing every normal opponent (without shield), the player gets <span style="color: #009933;font-weight: bold;">+10</span> points. Breaking a fortified opponent's shield awards the player <span style="color: #009933;font-weight: bold;">+10</span> points as well. Killing a fortified opponent awards the player <span style="color: #009933;font-weight: bold;">+50</span> points. Allowing an enemy to pass the base of the screen results in <span style="color: #ff0000;font-weight: bold;">-10</span> points. 
+</p>
 </div>
 
 <div class="row">
@@ -426,16 +480,18 @@ Difficulties and Possible Solutions
 </div>
 </div>
 
+<h2 class="subheading">Memory Management</h2>
 <div id="content">
+<p>
+The most unsurmountable problem is the memory management and lagging problem in Galaxy Wars SDL. If the game is played for long periods of time, we face serious framerate issues. This has been constantly improved over the development timeframe, but is still unsatisfactory. Explicit garbage collection in Perl is not well made as it is mostly made automatic. However SDL objects do not seem to follow the automatic garbage collection and an alternative will be necessary.
+</p>
+</div>
 
-We faced various difficulties of different levels while developing this idea. Some of the most important ones were as follows:
-(1) Lag and Memory Management: 
-	If the game is played for long periods of time, we face serious framerate issues. This has been constantly improved over the development timeframe, but is still unsatisfactory. Explicit garbage collection in Perl is not well made as it is mostly made automatic. However SDL objects do not seem to follow the automatic garbage collection and an alternative will be necessary. 
-
-(2) Enemy Artificial Intelligence:
-	We planned on giving the enemies and AI that makes them follow the player and avoid each other in smooth paths, but we found this was too difficult to implement in the given development period. 
-<pre>
-</pre>
+<h2 class="subheading">Enemy AI</h2>
+<div id="content">
+<p>
+Enemy Artificial Intelligence is a technical difficulty we encounter. We planned on giving the enemies and AI that makes them follow the player and avoid each other in smooth paths, but we found this was too difficult to implement in the given development period. 
+</p>
 </div>
 
 <div class="row">
@@ -444,11 +500,23 @@ Future Development
 </div>
 </div>
 
+<h2 class="subheading">Progressive Difficulty Accumulation</h2>
 <div id="content">
-<pre>
-Galaxy Wars has a nearly infinite scope for improvements. We could add new levels, new enemies, different weapons, powerups and even player customization. Instead of simply sticking to a vertical up down movement of ships, we hope to further develop a gamefield that permits 360° rotation allowing the player to shoot at enemies coming from any ddirection. In the future, even a multiplayer or co-operative form of this game does not seem outlandish and we wish we can make this happen. 
- 
-</pre>
+xxx
+</div>
+
+<h2 class="subheading">Random Power-up Spawning</h2>
+<div id="content">
+<p>
+Currently the game emplyes auto-increment of weapon upgrade (as described in <a href="#idea">Idea Development</a>). This method is easy to attain and the player satisfaction is not promoted as much. If we employ a power-up spawning, the players would need to put more effort to upgrade their weapons. The power-ups can also enable us to develop more varieties of weapons and of the ways to destroy enemies. For example, some power-ups could increase the energy points while some could decrease the number of enemy ships in the next spawn.
+</p>
+</div>
+
+<h2 class="subheading">And More...</h2>
+<div id="content">
+<p>
+Galaxy Wars has a nearly infinite scope for improvements. We could add new levels, new enemies, different weapons, powerups and even player customization. Instead of simply sticking to a vertical up down movement of ships, we hope to further develop a gamefield that permits 360 degree rotation allowing the player to shoot at enemies coming from any direction. In the future, even a multiplayer or co-operative form of this game does not seem outlandish and we wish we can make this happen. 
+</p>
 </div>
 
 <div class="row">
@@ -462,7 +530,8 @@ Conclusion
 <tr>
 <td class="content half">
 <p>
-All in all, developing Galaxy Wars was not an easy path to follow, especially we have to pick-up a new development framework----SDL within a short period of time. Nevertheless, creating this game has brought great satisfaction to us, and that, not only we had enjoyed the process of realizing game ideas into reality, but also fixing problems and improving our code. This course has provided ample freedom for us, students, to devise our own little projects. We hope we can work together again and achieve great things ahead.
+All in all, developing Galaxy Wars was not an easy path to follow, especially we have to pick-up a new development framework----SDL within a short period of time.</p>
+<p>Nevertheless, creating this game has brought great satisfaction to us, and that, not only we had enjoyed the process of realizing game ideas into reality, but also fixing problems and improving our code. This course has provided ample freedom for us, students, to devise our own little projects. We hope we can work together again and achieve great things ahead.
 </p>
 </td>
 <td>
