@@ -119,7 +119,7 @@ img {
 	}
 html>body #sidebar {
 	width: 12em;
-	height: 4150px;
+	height: 7000px;
 	}
 #content {
 	position: relative;
@@ -190,10 +190,33 @@ img {
   height: auto;
   border: 5px solid #777;
 }
-.content.half{
+.half{
 	color: #ccc;
 	padding-left: 25px;
 	width: 48%;
+}
+pre{
+	background-color: #eee;
+	padding: 5px;
+	width: 650px;
+}
+.img-relativelayout-s{
+	border: none;
+	max-width: 120px;
+	float: right;
+}
+.img-relativelayout-l{
+	border: none;
+	max-width: 200px;
+	float: right;
+	padding-left: 10px;
+}
+.img-relativelayout-l2{
+	border: none;
+	max-width: 200px;
+	float: left;
+	padding-right: 10px;
+
 }
 </style>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
@@ -249,27 +272,12 @@ Home
 <table>
 <tr>
 <td class="content half">
-<pre>
-#content2 {
-	float: left;
-	padding: 10px;
-	margin: 20px;
-	background: #666;
-	border: 5px solid #ccc;
-	width: 300px; 
-	/* ie5win fudge begins */
-	voice-family: "\"}\"";
-	voice-family:inherit;
-	width: 270px;
-	}
-html>body #content2 {
-	width: 270px; 
-	/* ie5win fudge ends */
-	}
-</pre>
+<p>
+Welcome to the Final Report page for COMP2021 Galaxy Wars SDL. Navigate by the sidebar on the left.
+</p>
 </td>
 <td>
-<img src="home.png"></img>
+<img src="cover.png"></img>
 </td>
 </tr>
 </table>
@@ -309,11 +317,54 @@ Idea Development
 
 <h2 class="subheading">On the enemy...</h2>
 <div id="content">
-enemy
+<p>
+<img src="alien.png" class="img-relativelayout-s"></img>
+In terms of graphics, the enemy ship has a streamlined body and greenish-blue highlights to indicate they use alien technology.</p>
+<p>
+In terms of game mechanics, the enemy ship is always moving towards the bottom of the screen (where the warp hole is) at a random speed, which will increase as the game continues.</p>
+<p>
+Below is the code snippet that controls the random movement of the enemy ship:</p>
+<pre>
+if(1 + int rand(300-5*(time-$start_time)) == 1)
+{
+	$inst->{sprite}->y( int($inst->{sprite}->y + ( $inst->{v_y} )) );
+}
+</pre>
+<p>
+Using the random function, the enemy ship's movement speed (indicated by the <i>v_y</i> element)  will vary according to every fream per second.
+</p>
+
 </div>
 <h2 class="subheading">On the weapon...</h2>
 <div id="content">
-weapon
+<p>
+<img src="gun.png" class="img-relativelayout-l"></img>
+In terms of graphics, the weapon produces gunshots that are small rectangles generated from the object creation method in the <i>SDL::Sprite</i> module.</p>
+<p>
+In terms of game mechanics, the weapon is first initialized with a constant velocity and color. Once reached a certain score (refer to <a href="#score">Score Calculation</a> for details)</p>
+<p>
+<img src="beam.png" class="img-relativelayout-l2"></img>
+Besides the regular gun shot weapon, the player ship is also equipped with a pulse laser beam that can last for about 5 seconds. The weapon is activated with the <i>b</i> keypress and this activation will exhaust 100 energy points. Any enemy that comes in contact with the beam will be destroyed immediately.</p>
+<br><br><br><br>
+<p>Below is the code snippet that detects the 5 second limit:</p>
+<pre>
+if($player->{beamOn} && $player->{beamTime} < 120 && $player->{energy}>99){
+	$beam->draw_xy($app, $player->{ship}->x-28, $player->{ship}->y-620);
+	$player->{beamTime}++;
+}
+else{
+	if($player->{beamOn} && $player->{energy}>99){
+		$player->{energy}-=100;
+	}
+	$player->{beamOn} = 0;
+	$player->{beamTime} = 0;
+}
+</pre>
+<p>
+The condition check involves three rules, namely:<br>(i) If the beam is activated<br>(ii) If the beam is activated over 120 time units<br>(iii) If the player ship's energy levels are sufficient, passing the minimum of 100 energy points
+</p>
+<p>
+On every frame, the player <i>beamTime</i> element will increment by 1. Since the frame per second is set as 24, the <i>beamTime</i>  element will increment roughly per second.</p>
 </div>
 
 <div class="row">
@@ -457,28 +508,25 @@ Conclusion
 </div>
 </div>
 
-<div id="content">
-<pre>
-#content2 {
-	float: left;
-	padding: 10px;
-	margin: 20px;
-	background: #666;
-	border: 5px solid #ccc;
-	width: 300px; 
-	/* ie5win fudge begins */
-	voice-family: "\"}\"";
-	voice-family:inherit;
-	width: 270px;
-	}
-html>body #content2 {
-	width: 270px; 
-	/* ie5win fudge ends */
-	}
-</pre>
+<div>
+<table>
+<tr>
+<td class="content half">
+<p>
+All in all, developing Galaxy Wars was not an easy path to follow, especially we have to pick-up a new development framework----SDL within a short period of time. Nevertheless, creating this game has brought great satisfaction to us, and that, not only we had enjoyed the process of realizing game ideas into reality, but also fixing problems and improving our code. This course has provided ample freedom for us, students, to devise our own little projects. We hope we can work together again and achieve great things ahead.
+</p>
+</td>
+<td>
+<img src="home.png"></img>
+</td>
+</tr>
+</table>
 </div>
+
+<div class="row">
 <div id="titlebar">
 <span>Project created by Arvind and Jonathan. Spring 2015 @HKUST.</span>
+</div>
 </div>
 </body>
 </html>
