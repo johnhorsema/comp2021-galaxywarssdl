@@ -456,9 +456,11 @@ Collision between sprites was handled by implementing simple Euclidean geometry.
 <p>
 We can categorize these as:
 </p>
-<p>(i) Player - Enemy: This collision triggers the explosion of the player ship. We do this by simply overlaying the picture of an explosion cloud over the position of the ship. We also reduce the number of lives of the player by 1. This is because we have limited the number of collisions the player can withstand to be 3. <br>
-(ii) Enemy - Bullet: An enemy - bullet collision triggers code that despawns both of these objects immediately. The score is increased by 10 points for a normal enemy and 50 for an armoured ship.<br>
-(iii) Enemy - Beam: Similar to enemy bullet this despawns the enemy ship however the beam is not stopped.
+<p>(i) Player - Enemy<br>This collision triggers the explosion of the player ship. We do this by simply overlaying the picture of an explosion cloud over the position of the ship. We also reduce the number of lives of the player by 1. This is because we have limited the number of collisions the player can withstand to be 3. </p>
+<p>
+(ii) Enemy - Bullet<br>An enemy - bullet collision triggers code that despawns both of these objects immediately. The score is increased by 10 points for a normal enemy and 50 for an armoured ship.</p>
+<p>
+(iii) Enemy - Beam<br>Similar to enemy bullet this despawns the enemy ship however the beam is not stopped.
 </p> 
 </div>
 
@@ -502,7 +504,9 @@ Future Development
 
 <h2 class="subheading">Progressive Difficulty Accumulation</h2>
 <div id="content">
-Having only one type of enemy that simply moves forward makes the game a little repetitive. One obvious iidea is to have enemies that can shoot. Having to avoid enemy damage while also trying to hit them can step up the challenge of the game drastically. There is also the other alternative of increasing speed and increasing the randomness of their motion. Similar to having power-ups an implementation of  'power-down' might also be required. A collectible that reduces speed or disallows the player from shooting for a set time of a few seconds would make the game less repetitive and more interesting.  
+<p>
+Having only one type of enemy that simply moves forward makes the game a little repetitive. One obvious iidea is to have enemies that can shoot. Having to avoid enemy damage while also trying to hit them can step up the challenge of the game drastically. There is also the other alternative of increasing speed and increasing the randomness of their motion. Similar to having power-ups an implementation of  'power-down' might also be required. A collectible that reduces speed or disallows the player from shooting for a set time of a few seconds would make the game less repetitive and more interesting.
+</p>
 </div>
 
 <h2 class="subheading">Random Power-up Spawning</h2>
